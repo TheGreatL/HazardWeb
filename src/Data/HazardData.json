@@ -1,0 +1,12 @@
+{
+	"Pob1": {
+		"Map": "/pob1_map.svg",
+		"Flood": "/pob1_flood.svg",
+		"Landslide": "/pob1_landslide.svg"
+	},
+	"Pob5": {
+		"Map": "/pob5_map.svg",
+		"Flood": "/pob5_flood.svg",
+		"Landslide": "/pob5_landslide.svg"
+	}
+}

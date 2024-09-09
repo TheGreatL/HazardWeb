@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base{
+    body{
+        height: 100vh;
+        background-image: url('/blur_image.png');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .hide-scroll-bar::-webkit-scrollbar{
+            display: none;
+
+    }
+    *{
+        font-family: sans-serif,Arial, ;
+    }
+}
