@@ -1,4 +1,5 @@
-function LoginForm() {
+import Proptypes from "prop-types";
+function LoginForm({ setIsLoggedIn }) {
 	return (
 		<>
 			<section className="h-screen flex">
@@ -24,6 +25,14 @@ function LoginForm() {
 							placeholder="password"
 						/>
 						<button
+							onClick={() => {
+								setIsLoggedIn(
+									() => true
+								);
+								console.log(
+									"Logged in"
+								);
+							}}
 							className="bg-white py-1 px-3 lg:py-3 lg:px-5 rounded-xl text-lg lg:text-2xl text-black font-bold uppercase tracking-wider self-center "
 							type="button">
 							Submit
@@ -35,4 +44,7 @@ function LoginForm() {
 		</>
 	);
 }
+LoginForm.propTypes = {
+	setIsLoggedIn: Proptypes.func,
+};
 export default LoginForm;

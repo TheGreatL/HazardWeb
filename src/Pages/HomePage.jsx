@@ -2,29 +2,34 @@ import { Menu, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import LeftSideBar from "../Components/Left_Side_Bar";
 import DisplayHazardRisk from "../Components/Display_Hazard_Risk";
-import Legend from "../Components/Legend";
+// import Legend from "../Components/Legend";
 function MainComponent() {
 	const [isSideBarShowing, setSideBar] = useState(false);
 	const [isLegendVisible, setLegendVisibility] = useState(false);
 	const [isHazardToggle, setHazardToggle] = useState(0);
-
-	async function FetchData() {
-		try {
-			const response = await fetch("/src/Data/HazardData.json");
-			if (!response.ok) {
-				throw new Error("error");
-			}
-			const data = await response.json();
-			return data;
-		} catch (error) {
-			console.error(error);
-		}
-	}
+	const [barangay, setBarangay] = useState([
+		{
+			Name: "Taft",
+			Zoom: 11,
+			X: 11.9038073336903,
+			Y: 125.36533722559534,
+			outlines: [
+				{ X: 11.782170048098457, Y: 125.28843293003246 },
+				{ X: 11.921947471158985, Y: 125.25478730072373 },
+				{ X: 11.950163052083685, Y: 125.42301544726747 },
+				{ X: 11.869539327517373, Y: 125.43194183871675 },
+				{ X: 11.78165678005133, Y: 125.28958336415504 },
+			],
+		},
+	]);
 
 	return (
 		<>
 			<main className="grid lg:grid-cols-[auto,1fr] grid-cols-1  bg-transparent max-w-full h-screen ">
-				<LeftSideBar isSideBarShowing={isSideBarShowing} />
+				<LeftSideBar
+					isSideBarShowing={isSideBarShowing}
+					setBarangay={setBarangay}
+				/>
 				{/* Right Side */}
 				<div className="flex flex-col  bg-transparent overflow-hidden">
 					<header className="flex  justify-around ">
@@ -83,10 +88,8 @@ function MainComponent() {
 
 					<div className=" flex-grow flex items-center justify-center overflow-auto flex-col lg:flex-row  relative">
 						<DisplayHazardRisk
-							isHazardToggle={
-								isHazardToggle
-							}
 							// MapImages={}
+							barangay={barangay}
 						/>
 					</div>
 				</div>
@@ -111,7 +114,6 @@ function MainComponent() {
 					className="fixed bg-yellow-300 bottom-52 -right-8 hover:-right-4 lg:-right-6 lg:hover:-right-4 transition-right duration-300 ease-out flex justify-start overflow-hidden size-12 items-start rounded-lg">
 					<ChevronLeft className=" h-full" />
 				</button>
-				<Legend isLegendVisible={isLegendVisible} />
 			</main>
 		</>
 	);
