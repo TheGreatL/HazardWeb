@@ -1,5 +1,7 @@
 import Proptypes from "prop-types";
-function LoginForm({ setIsLoggedIn }) {
+import { useNavigate } from "react-router-dom";
+function Admin_Sign_In() {
+	const navigate = useNavigate();
 	return (
 		<>
 			<section className="h-screen flex">
@@ -26,9 +28,7 @@ function LoginForm({ setIsLoggedIn }) {
 						/>
 						<button
 							onClick={() => {
-								setIsLoggedIn(
-									() => true
-								);
+								navigate("/Home");
 								console.log(
 									"Logged in"
 								);
@@ -44,7 +44,7 @@ function LoginForm({ setIsLoggedIn }) {
 		</>
 	);
 }
-LoginForm.propTypes = {
+Admin_Sign_In.propTypes = {
 	setIsLoggedIn: Proptypes.func,
 };
-export default LoginForm;
+export default Admin_Sign_In;

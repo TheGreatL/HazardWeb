@@ -1,36 +1,22 @@
-import { Menu, ChevronLeft } from "lucide-react";
 import { useState } from "react";
-import LeftSideBar from "../Components/Left_Side_Bar";
+import { Menu } from "lucide-react";
+import BarangayButton from "../Components/Barangay_Button";
 import DisplayHazardRisk from "../Components/Display_Hazard_Risk";
-// import Legend from "../Components/Legend";
-function MainComponent() {
+function Default_Home_Page() {
 	const [isSideBarShowing, setSideBar] = useState(false);
-	const [isLegendVisible, setLegendVisibility] = useState(false);
 	const [isHazardToggle, setHazardToggle] = useState(0);
-	const [barangay, setBarangay] = useState([
-		{
-			Name: "Taft",
-			Zoom: 11,
-			X: 11.9038073336903,
-			Y: 125.36533722559534,
-			outlines: [
-				{ X: 11.782170048098457, Y: 125.28843293003246 },
-				{ X: 11.921947471158985, Y: 125.25478730072373 },
-				{ X: 11.950163052083685, Y: 125.42301544726747 },
-				{ X: 11.869539327517373, Y: 125.43194183871675 },
-				{ X: 11.78165678005133, Y: 125.28958336415504 },
-			],
-		},
-	]);
+	const [isLegendVisible, setLegendVisibility] = useState(false);
 
 	return (
 		<>
 			<main className="grid lg:grid-cols-[auto,1fr] grid-cols-1  bg-transparent max-w-full h-screen ">
-				<LeftSideBar
-					isSideBarShowing={isSideBarShowing}
-					setBarangay={setBarangay}
-				/>
-				{/* Right Side */}
+				<div
+					className={`${isSideBarShowing ? "opacity-100 visible" : "opacity-0 invisible lg:opacity-100 lg:visible"}  transition-opacity ease-in transition- duration-300 flex bg-gray-400 lg:bg-transparent fixed left-0 bottom-0 right-32  bg-transparent  gap-0.5  lg:flex flex-col  overflow-hidden lg:static top-0 z-10`}>
+					<p className=" text-wrap bg-white rounded-xl  lg:text-xl text-center  p-3 lg:p-8 my-3 px-0 lg:px-14 m-2 font-bold uppercase">
+						List of Barangay
+					</p>
+					<BarangayButton />
+				</div>
 				<div className="flex flex-col  bg-transparent overflow-hidden">
 					<header className="flex  justify-around ">
 						<button
@@ -84,39 +70,12 @@ function MainComponent() {
 							<Menu />
 						</button>
 					</header>
-					{/* Map Container */}
-
 					<div className=" flex-grow flex items-center justify-center overflow-auto flex-col lg:flex-row  relative">
-						<DisplayHazardRisk
-							// MapImages={}
-							barangay={barangay}
-						/>
+						<DisplayHazardRisk />
 					</div>
 				</div>
-				<button
-					onClick={() =>
-						setLegendVisibility(
-							(isLegendVisible) => {
-								if (
-									isSideBarShowing
-								)
-									setSideBar(
-										(
-											isSideBarShowing
-										) =>
-											!isSideBarShowing
-									);
-
-								return !isLegendVisible;
-							}
-						)
-					}
-					className="fixed bg-yellow-300 bottom-52 -right-8 hover:-right-4 lg:-right-6 lg:hover:-right-4 transition-right duration-300 ease-out flex justify-start overflow-hidden size-12 items-start rounded-lg">
-					<ChevronLeft className=" h-full" />
-				</button>
 			</main>
 		</>
 	);
 }
-
-export default MainComponent;
+export default Default_Home_Page;

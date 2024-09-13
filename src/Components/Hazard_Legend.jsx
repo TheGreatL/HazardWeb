@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { XIcon } from "lucide-react";
 import { PieChart } from "@mui/x-charts";
-function Legend({ isLegendVisible, setLegendVisibility, Label }) {
+function Hazard_Legend({ isLegendVisible, setLegendVisibility, Label }) {
 	return (
 		<>
 			<div
@@ -87,9 +87,9 @@ function Legend({ isLegendVisible, setLegendVisibility, Label }) {
 		</>
 	);
 }
-Legend.propTypes = {
+Hazard_Legend.propTypes = {
 	isLegendVisible: PropTypes.bool,
 	Label: PropTypes.string,
 	setLegendVisibility: PropTypes.func,
 };
-export default Legend;
+export default Hazard_Legend;

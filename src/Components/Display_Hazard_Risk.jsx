@@ -1,11 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { MapContainer, TileLayer, FeatureGroup, Polyline } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
-import Legend from "./Legend";
+import Legend from "./Hazard_Legend";
 import PropTypes from "prop-types";
 import FormDialog from "./Form_Dialog";
+import { MapContext } from "../Run";
 
-function DisplayHazardRisk({ barangay }) {
+function Display_HazardRisk() {
+	const [MapLocation] = useContext(MapContext);
+
 	const isUser = false;
 	const [polylines, setPolylines] = React.useState([]);
 	const mapRef = useRef();
@@ -20,7 +23,7 @@ function DisplayHazardRisk({ barangay }) {
 
 	useEffect(() => {
 		if (mapRef.current) {
-			const { Zoom, X, Y, outlines } = barangay[0];
+			const { Zoom, X, Y, outlines } = MapLocation[0];
 			mapRef.current.flyTo([X, Y], Zoom);
 			console.log(outlineRef.current);
 
@@ -38,7 +41,7 @@ function DisplayHazardRisk({ barangay }) {
 			// 	outlineRef.current._latlngs[i][0].lng = outlines[i].X;
 			// }
 		}
-	}, [barangay]);
+	}, [MapLocation]);
 	const handleCreated = (e) => {
 		const { layer } = e;
 
@@ -100,8 +103,8 @@ function DisplayHazardRisk({ barangay }) {
 				<MapContainer
 					ref={mapRef}
 					className="relative w-full h-full z-10"
-					center={[barangay[0].X, barangay[0].Y]}
-					zoom={barangay[0].Zoom}
+					center={[MapLocation[0].X, MapLocation[0].Y]}
+					zoom={MapLocation[0].Zoom}
 					attributionControl={false}>
 					{/* TileLayer defines the type of map to use, OpenStreetMap in this case */}
 					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -139,7 +142,7 @@ function DisplayHazardRisk({ barangay }) {
 								weight: 1,
 							}}
 							interactive={false}
-							positions={barangay[0].outlines.map(
+							positions={MapLocation[0].outlines.map(
 								(element) => {
 									return [
 										element.X,
@@ -197,7 +200,7 @@ function DisplayHazardRisk({ barangay }) {
 		</>
 	);
 }
-DisplayHazardRisk.propTypes = {
+Display_HazardRisk.propTypes = {
 	barangay: PropTypes.array,
 };
-export default DisplayHazardRisk;
+export default Display_HazardRisk;

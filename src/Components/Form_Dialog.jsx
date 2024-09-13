@@ -10,7 +10,7 @@ import {
 import PropTypes from "prop-types";
 import { XIcon } from "lucide-react";
 
-function FormDialog({ isDialogOpen, setDialogOpen }) {
+function Form_Dialog({ isDialogOpen, setDialogOpen }) {
 	console.log("FOMR OPEN? ", isDialogOpen);
 	return (
 		<>
@@ -72,9 +72,9 @@ function FormDialog({ isDialogOpen, setDialogOpen }) {
 		</>
 	);
 }
-FormDialog.propTypes = {
+Form_Dialog.propTypes = {
 	isDialogOpen: PropTypes.bool,
 	setDialogOpen: PropTypes.func,
 };
 
-export default FormDialog;
+export default Form_Dialog;
