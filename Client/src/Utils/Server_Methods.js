@@ -2,7 +2,7 @@ import axios from "axios";
 export const writeData = async (passData) => {
 	try {
 		const response = await axios.post(
-			"http://localhost:5000/api/hazard/insert",
+			"http://localhost:5000/api/hazard/POST",
 			passData,
 			{
 				headers: {

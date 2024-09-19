@@ -3,8 +3,7 @@ import { useContext, useRef, useState } from "react";
 import { UserContext } from "../Run";
 import Alert from "@mui/material/Alert";
 import { Button } from "@mui/material";
-import withReactContent from "sweetalert2-react-content";
-import Swal from "sweetalert2";
+import { DIALOG_SUCCESS } from "../Utils/Dialogs_Methods";
 function Admin_Sign_In() {
 	const [, setIsUser] = useContext(UserContext);
 	const password = useRef();
@@ -43,19 +42,14 @@ function Admin_Sign_In() {
 							}
 							setIsUser(() => false);
 							setInputValid(() => true);
-							const MySwal =
-								withReactContent(
-									Swal
-								);
-							MySwal.fire({
-								position: "center",
-								icon: "success",
-								title: "Login Sucessful",
-								showConfirmButton: false,
-								timer: 1000,
-							});
+							DIALOG_SUCCESS(
+								"Login Sucessful",
+								"",
+								false,
+								1000
+							);
 							setTimeout(() => {
-								navigate("/Home", {
+								navigate("/home", {
 									replace: true,
 								});
 							}, 1000);

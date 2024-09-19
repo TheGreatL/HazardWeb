@@ -11,13 +11,13 @@ import { EditControl } from "react-leaflet-draw";
 import Legend from "./Hazard_Legend";
 import FormDialog from "./Form_Dialog";
 import { MapContext, UserContext } from "../Run";
-import { writeData } from "../Data/Mehods";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+import { writeData } from "../Utils/Server_Methods";
 
 // CommonJS
 
 import L from "leaflet";
+import { DIALOG_ERROR, DIALOG_SUCCESS } from "../Utils/Dialogs_Methods";
+import axios from "axios";
 const { BaseLayer, Overlay } = LayersControl;
 function Hazard_Display() {
 	const [MapLocation] = useContext(MapContext);
@@ -35,6 +35,7 @@ function Hazard_Display() {
 	const [isDialogOpen, setDialogOpen] = useState(false);
 	const [hazardDetails, setHazardDetails] = useState({});
 	const [newLayer, setNewLayer] = useState(null);
+	const [maps, setMaps] = useState([]);
 
 	const customIcon = L.icon({
 		iconUrl: "/map-pin.svg", // Path to your custom icon image
@@ -59,30 +60,21 @@ function Hazard_Display() {
 		}
 	}, [MapLocation]);
 
-	const data = async (passData, passLayer) => {
-		const MySwal = withReactContent(Swal);
+	const POST_DATA = async (passData, passLayer) => {
+		//Correct
 		if (await writeData(passData)) {
-			MySwal.fire({
-				position: "center",
-				icon: "success",
-				title: "Sucess",
-				text: "Writing Data Sucessful",
-				showConfirmButton: false,
-				timer: 1500,
-			});
-			console.log(mapRef.current);
+			console.log("write Data");
+			DIALOG_SUCCESS("Sucess", "Writing Data Sucessful");
 			if (passLayer instanceof L.Polygon) {
 				setPolylines([...polylines, passLayer.getLatLngs()]);
 			} else if (passLayer instanceof L.Marker) {
 				setPolylines([...polylines, passLayer.getLatLng()]);
 			}
+			return;
 		} else {
-			MySwal.fire({
-				title: "Failed",
-				text: "Writing Data failed",
-				icon: "error",
-				timer: 1500,
-			});
+			//Error or False
+
+			DIALOG_ERROR("Failed", "Writing Data Failed");
 			if (mapRef.current.hasLayer(passLayer))
 				mapRef.current.removeLayer(passLayer);
 		}
@@ -126,7 +118,7 @@ function Hazard_Display() {
 			details: details,
 			coords: _latlngs[0],
 		};
-		data(passData, layer);
+		POST_DATA(passData, layer);
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isDialogOpen, newLayer, hazardDetails]);
@@ -162,6 +154,21 @@ function Hazard_Display() {
 	const markerClicked = () => {
 		mapRef.current.flyTo([MapLocation[0].X, MapLocation[0].Y], MapLocation[0].Zoom);
 	};
+	useState(() => {
+		const Maps = async () => {
+			const response = await axios.get("/src/Data/Map.json");
+			return response.data;
+		};
+
+		Maps().then((data) => {
+			const map = Object.keys(data).map((key) => (
+				<BaseLayer key={key} name={data[key].name}>
+					<TileLayer url={data[key].url} />
+				</BaseLayer>
+			));
+			setMaps(() => map);
+		});
+	}, []);
 
 	return (
 		<>
@@ -213,7 +220,7 @@ function Hazard_Display() {
 								attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 							/>
 						</BaseLayer>
-
+						{maps.map((item) => item)}
 						{/* Overlay layers */}
 						<Overlay checked name="Hazards">
 							<FeatureGroup

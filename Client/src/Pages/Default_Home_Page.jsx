@@ -1,11 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Menu } from "lucide-react";
 import BarangayButton from "../Components/Barangay_Button";
 import DisplayHazardRisk from "../Components/Hazard_Display";
 import { UserIcon } from "lucide-react";
 import { Button, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+
 import { UserContext } from "../Run";
 function Default_Home_Page() {
 	const [isSideBarShowing, setSideBar] = useState(false);
@@ -13,21 +13,6 @@ function Default_Home_Page() {
 	const [isLegendVisible, setLegendVisibility] = useState(false);
 	const navigateLoginAdmin = useNavigate();
 	const [isUser] = useContext(UserContext);
-	// const fetchData = async () => {
-	// 	try {
-	// 		const response = await axios.get(
-	// 			"http://localhost:5000/api/barangay"
-	// 		);
-
-	// 		console.log(response.data);
-	// 		return response.data;
-	// 	} catch (error) {
-	// 		console.error(error);
-	// 	}
-	// };
-	// useEffect(() => {
-	// 	fetchData();
-	// }, []);
 
 	return (
 		<>
