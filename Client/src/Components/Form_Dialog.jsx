@@ -20,7 +20,7 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 	const hazardName = useRef();
 	const hazardDetails = useRef();
 	const [hazardtype, setHazardType] = useState("");
-
+	const [hazardSusceptibility, setHazardSusceptibility] = useState("");
 	return (
 		<>
 			<Dialog open={isDialogOpen} scroll="paper" fullWidth={true}>
@@ -55,6 +55,8 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 									.current
 									.value,
 								type: hazardtype,
+								susceptibility:
+									hazardSusceptibility,
 								details: hazardDetails
 									.current
 									.value,
@@ -100,18 +102,69 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 									}}>
 									<MenuItem
 										value={
-											"FLOOD"
+											"FL200"
 										}>
 										Flood
 									</MenuItem>
 									<MenuItem
 										value={
-											"LANDSLIDE"
+											"LS200"
 										}>
 										Landslide
 									</MenuItem>
 								</Select>
 							</FormControl>
+
+							<FormControl
+								fullWidth
+								variant="outlined">
+								<InputLabel id="select-label-susceptibility">
+									Hazard
+									Susceptibility
+								</InputLabel>
+								<Select
+									labelId="select-label-susceptibility"
+									label="Hazard Susceptibility"
+									value={
+										hazardSusceptibility
+									}
+									onChange={(
+										event
+									) => {
+										setHazardSusceptibility(
+											() =>
+												event
+													.target
+													.value
+										);
+									}}>
+									<MenuItem
+										value={
+											1
+										}>
+										1
+									</MenuItem>
+									<MenuItem
+										value={
+											2
+										}>
+										2
+									</MenuItem>
+									<MenuItem
+										value={
+											3
+										}>
+										4
+									</MenuItem>
+									<MenuItem
+										value={
+											4
+										}>
+										4
+									</MenuItem>
+								</Select>
+							</FormControl>
+
 							<TextField
 								inputRef={
 									hazardDetails

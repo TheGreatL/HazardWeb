@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useContext } from "react";
+
 import {
 	MapContainer,
 	TileLayer,
@@ -6,20 +7,21 @@ import {
 	Polyline,
 	LayersControl,
 	Marker,
+	Polygon,
 } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import Legend from "./Hazard_Legend";
 import FormDialog from "./Form_Dialog";
 import { MapContext, UserContext } from "../Run";
-import { writeData } from "../Utils/Server_Methods";
-
+import { getHazards, writeData } from "../Utils/Server_Methods";
+import Proptypes from "prop-types";
 // CommonJS
 
-import L from "leaflet";
+import L, { featureGroup } from "leaflet";
 import { DIALOG_ERROR, DIALOG_SUCCESS } from "../Utils/Dialogs_Methods";
 import axios from "axios";
 const { BaseLayer, Overlay } = LayersControl;
-function Hazard_Display() {
+function Hazard_Display({ hazardToggle }) {
 	const [MapLocation] = useContext(MapContext);
 	const [isUser] = useContext(UserContext);
 	const [polylines, setPolylines] = useState([]);
@@ -36,6 +38,7 @@ function Hazard_Display() {
 	const [hazardDetails, setHazardDetails] = useState({});
 	const [newLayer, setNewLayer] = useState(null);
 	const [maps, setMaps] = useState([]);
+	const [hazards, setHazards] = useState([]);
 
 	const customIcon = L.icon({
 		iconUrl: "/map-pin.svg", // Path to your custom icon image
@@ -43,7 +46,43 @@ function Hazard_Display() {
 		iconAnchor: [25, 50], // Center the icon horizontally and position it at the bottom vertically
 		popupAnchor: [0, -30], // Position popup above the icon
 	});
+	useEffect(() => {
+		if (editableFG.current) {
+			editableFG.current.clearLayers();
+		}
+		if (hazardToggle == 0) {
+			return;
+		}
+		setHazards(() => []);
+		getHazards(hazardToggle).then((datas) => {
+			const hazardvar = Object.keys(datas).map((key) => {
+				const data = datas[key];
 
+				const position = [];
+				data.Outlines.forEach((coords) => {
+					position.push([
+						Number(coords.HazardLong),
+						Number(coords.HazardLat),
+					]);
+				});
+				return (
+					<Polygon
+						key={data.HazardID}
+						pathOptions={{
+							color:
+								data.HazardTypeID ==
+								"LS200"
+									? "green"
+									: "red",
+							weight: 5,
+						}}
+						positions={position}
+					/>
+				);
+			});
+			setHazards(() => hazardvar);
+		});
+	}, [hazardToggle]);
 	useEffect(() => {
 		if (mapRef.current) {
 			const { Zoom, X, Y, outlines } = MapLocation[0];
@@ -73,7 +112,6 @@ function Hazard_Display() {
 			return;
 		} else {
 			//Error or False
-
 			DIALOG_ERROR("Failed", "Writing Data Failed");
 			if (mapRef.current.hasLayer(passLayer))
 				mapRef.current.removeLayer(passLayer);
@@ -87,8 +125,12 @@ function Hazard_Display() {
 			return;
 		}
 		const layer = newLayer;
-		const { name, type, details } = hazardDetails;
 
+		const { name, type, details, susceptibility } = hazardDetails;
+		console.log(layer.options.color);
+		layer.setStyle({
+			color: type === "LS200" ? "#008000" : "#FF0000", // Make sure the color format is correct with a `#`
+		});
 		const popupContent = `
 			<div class="flex flex-col  items-center m-3 justify-center">
 				<h3>Name:${name}</h3>
@@ -114,6 +156,7 @@ function Hazard_Display() {
 		const passData = {
 			name: name,
 			id: _leaflet_id,
+			susceptibility: susceptibility,
 			type: type,
 			details: details,
 			coords: _latlngs[0],
@@ -166,6 +209,7 @@ function Hazard_Display() {
 					<TileLayer url={data[key].url} />
 				</BaseLayer>
 			));
+
 			setMaps(() => map);
 		});
 	}, []);
@@ -183,7 +227,7 @@ function Hazard_Display() {
 				setLegendVisibility={setLegendVisibility}
 				Label={Label}
 			/>
-			<div className="flex relative size-11/12 overflow-hidden z-0  ">
+			<div className="flex relative size-11/12 overflow-hidden z-0  border-4 border-white  rounded-2xl">
 				<MapContainer
 					ref={mapRef}
 					className="relative w-full h-full z-10"
@@ -193,38 +237,20 @@ function Hazard_Display() {
 					<LayersControl position="topright">
 						{/* Base Layer */}
 						<BaseLayer checked name="Default Map">
-							<TileLayer
-								url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
-								attribution='&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-							/>
-						</BaseLayer>
-						<BaseLayer name="Satellite View">
-							<TileLayer
-								minZoom={0}
-								maxZoom={20}
-								url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.{ext}"
-								attribution={`&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors`}
-								ext="jpg"
-							/>
-						</BaseLayer>
-
-						<BaseLayer name="Terrain View">
-							<TileLayer
-								url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-								attribution='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
-							/>
-						</BaseLayer>
-						<BaseLayer name="World Imagery">
-							<TileLayer
-								url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-								attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-							/>
+							<TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
 						</BaseLayer>
 						{maps.map((item) => item)}
+
 						{/* Overlay layers */}
 						<Overlay checked name="Hazards">
 							<FeatureGroup
 								ref={editableFG}>
+								{hazards.map(
+									(
+										hazard
+									) =>
+										hazard
+								)}
 								{!isUser && (
 									<EditControl
 										position="topright"
@@ -350,4 +376,5 @@ function Hazard_Display() {
 		</>
 	);
 }
+
 export default Hazard_Display;

@@ -88,7 +88,9 @@ function Default_Home_Page() {
 						</IconButton>
 					</header>
 					<div className=" flex-grow flex items-center justify-center overflow-auto flex-col lg:flex-row  relative">
-						<DisplayHazardRisk />
+						<DisplayHazardRisk
+							hazardToggle={isHazardToggle}
+						/>
 					</div>
 				</div>
 			</main>
