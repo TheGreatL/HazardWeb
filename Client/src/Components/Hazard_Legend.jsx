@@ -3,6 +3,9 @@ import { XIcon } from "lucide-react";
 import { PieChart } from "@mui/x-charts";
 import { Button } from "@mui/material";
 function Hazard_Legend({ isLegendVisible, setLegendVisibility, Label }) {
+	const landslideColors = ["#FF4D4D", "#FF2A2A", "#B22222", "#8B0000"];
+	const floodColors = ["#4DFF4D", "#32CD32", "#228B22", "#556B2F"];
+
 	return (
 		<>
 			<div
@@ -12,56 +15,66 @@ function Hazard_Legend({ isLegendVisible, setLegendVisibility, Label }) {
 					onClick={() => setLegendVisibility(() => false)}>
 					<XIcon />
 				</Button>
-				<div className=" h-32 z-0 text-white ">
-					<PieChart
-						className="text-sm"
-						series={[
-							{
-								data: [
-									{
-										id: 0,
-										value: 10,
-										label:
-											Label +
-											" High",
-									},
-									{
-										id: 1,
-										value: 15,
-										label:
-											Label +
-											" Moderate",
-									},
-									{
-										id: 2,
-										value: 20,
-										label:
-											Label +
-											" low",
-									},
-								],
-								highlightScope: {
-									fade: "global",
-									highlight: "item",
+
+				<PieChart
+					className="text-sm"
+					series={[
+						{
+							data: [
+								{
+									id: 0,
+									value: 10,
+									label: "High",
+									color: floodColors[0],
 								},
-								faded: {
-									innerRadius: 30,
-									additionalRadius:
-										-30,
-									color: "#8884d8",
+								{
+									id: 1,
+									value: 15,
+									label: "High",
+									color: floodColors[1],
 								},
+								{
+									id: 2,
+									value: 20,
+									label: "Low",
+									color: floodColors[2],
+								},
+								{
+									id: 3,
+									value: 20,
+									label: "Very Low",
+
+									color: floodColors[3],
+								},
+							],
+							highlightScope: {
+								fade: "global",
+								highlight: "item",
 							},
-						]}
-						slotProps={{
-							legend: {
-								labelStyle: {
-									fontSize: "0.8rem",
-									fill: "#fff",
-								},
+							faded: {
+								innerRadius: 30,
+								additionalRadius:
+									-30,
+								color: "#4DFF4D",
 							},
-						}}
-					/>
-				</div>
+						},
+					]}
+					slotProps={{
+						legend: {
+							labelStyle: {
+								tableLayout: "fixed",
+								color: "white", // Set the text color to white
+							},
+							direction: "row",
+							position: {
+								horizontal: "middle", // Center the labels horizontally
+								vertical: "bottom", // Position the labels at the bottom
+							},
+						},
+					}}
+					margin={{ right: 20, left: 20, bottom: 50 }}
+				/>
+
 				<div className="flex flex-col gap-2 text-white">
 					<p className="text-sm text-white">
 						<span className="bg-yellow-300 size-1 px-3 mx-2"></span>

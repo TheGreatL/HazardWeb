@@ -22,7 +22,7 @@ function Default_Home_Page() {
 					<p className=" text-wrap bg-white rounded-xl  lg:text-xl text-center  p-3 lg:p-8 my-3 px-0 lg:px-14 m-2 font-bold uppercase">
 						List of Barangay
 					</p>
-					<BarangayButton />
+					<BarangayButton setSideBar={setSideBar} />
 				</div>
 				<div className="flex flex-col  bg-transparent overflow-hidden">
 					<header className="flex  justify-around  px-5 flex-wrap">
@@ -90,6 +90,9 @@ function Default_Home_Page() {
 					<div className=" flex-grow flex items-center justify-center overflow-auto flex-col lg:flex-row  relative">
 						<DisplayHazardRisk
 							hazardToggle={isHazardToggle}
+							setHazardToggle={
+								setHazardToggle
+							}
 						/>
 					</div>
 				</div>

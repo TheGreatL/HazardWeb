@@ -18,7 +18,7 @@ import { useRef, useState } from "react";
 
 function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 	const hazardName = useRef();
-	const hazardDetails = useRef();
+	const hazardDetailsForm = useRef();
 	const [hazardtype, setHazardType] = useState("");
 	const [hazardSusceptibility, setHazardSusceptibility] = useState("");
 	return (
@@ -57,7 +57,7 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 								type: hazardtype,
 								susceptibility:
 									hazardSusceptibility,
-								details: hazardDetails
+								details: hazardDetailsForm
 									.current
 									.value,
 							});
@@ -76,6 +76,9 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 								label="Name"
 								variant="outlined"
 								size="small"
+								// defaultValue={
+								// 	hazardDetails.name
+								// }
 							/>
 							<FormControl
 								fullWidth
@@ -90,6 +93,9 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 									value={
 										hazardtype
 									}
+									// defaultValue={
+									// 	hazardDetails.type
+									// }
 									onChange={(
 										event
 									) => {
@@ -128,6 +134,9 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 									value={
 										hazardSusceptibility
 									}
+									// defaultValue={
+									// 	hazardDetails.susceptibility
+									// }
 									onChange={(
 										event
 									) => {
@@ -140,35 +149,41 @@ function Form_Dialog({ isDialogOpen, setDialogOpen, setHazardDetails }) {
 									}}>
 									<MenuItem
 										value={
-											1
+											4
 										}>
-										1
-									</MenuItem>
-									<MenuItem
-										value={
-											2
-										}>
-										2
+										Very
+										Hazardous
 									</MenuItem>
 									<MenuItem
 										value={
 											3
 										}>
-										4
+										Mid
+										Hazardous
 									</MenuItem>
 									<MenuItem
 										value={
-											4
+											2
 										}>
-										4
+										Hazardous
+									</MenuItem>
+									<MenuItem
+										value={
+											1
+										}>
+										Not
+										Very
 									</MenuItem>
 								</Select>
 							</FormControl>
 
 							<TextField
 								inputRef={
-									hazardDetails
+									hazardDetailsForm
 								}
+								// defaultValue={
+								// 	hazardDetails.details
+								// }
 								id="outlined-basic"
 								label="Hazard Details"
 								multiline
@@ -201,6 +216,7 @@ Form_Dialog.propTypes = {
 	isDialogOpen: PropTypes.bool,
 	setDialogOpen: PropTypes.func,
 	setHazardDetails: PropTypes.func,
+	hazardDetails: PropTypes.object,
 };
 
 export default Form_Dialog;

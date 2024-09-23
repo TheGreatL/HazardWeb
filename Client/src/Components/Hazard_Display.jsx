@@ -8,6 +8,7 @@ import {
 	LayersControl,
 	Marker,
 	Polygon,
+	Popup,
 } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import Legend from "./Hazard_Legend";
@@ -17,11 +18,12 @@ import { getHazards, writeData } from "../Utils/Server_Methods";
 import Proptypes from "prop-types";
 // CommonJS
 
-import L, { featureGroup } from "leaflet";
+import L from "leaflet";
 import { DIALOG_ERROR, DIALOG_SUCCESS } from "../Utils/Dialogs_Methods";
 import axios from "axios";
+import { Button, Slider } from "@mui/material";
 const { BaseLayer, Overlay } = LayersControl;
-function Hazard_Display({ hazardToggle }) {
+function Hazard_Display({ hazardToggle, setHazardToggle }) {
 	const [MapLocation] = useContext(MapContext);
 	const [isUser] = useContext(UserContext);
 	const [polylines, setPolylines] = useState([]);
@@ -29,16 +31,22 @@ function Hazard_Display({ hazardToggle }) {
 	const outlineRef = useRef();
 	const markerRef = useRef();
 	const editableFG = useRef();
-	const [markerColor, setMarker] = useState("#ff0000");
 	const [, setOpacityVisibility] = useState(false);
 	const [isLegendVisible, setLegendVisibility] = useState(false);
 	const [Label, setLabel] = useState(null);
-	const [clickedID, setClickedID] = useState(null);
 	const [isDialogOpen, setDialogOpen] = useState(false);
-	const [hazardDetails, setHazardDetails] = useState({});
+	const [hazardDetails, setHazardDetails] = useState({
+		name: "",
+		type: "",
+		susceptibility: 4,
+		details: "",
+	});
 	const [newLayer, setNewLayer] = useState(null);
 	const [maps, setMaps] = useState([]);
 	const [hazards, setHazards] = useState([]);
+	const [clickedID, setClickedID] = useState(null);
+	const landslideColors = ["#FF4D4D", "#FF2A2A", "#B22222", "#8B0000"];
+	const floodColors = ["#4DFF4D", "#32CD32", "#228B22", "#556B2F"];
 
 	const customIcon = L.icon({
 		iconUrl: "/map-pin.svg", // Path to your custom icon image
@@ -47,6 +55,7 @@ function Hazard_Display({ hazardToggle }) {
 		popupAnchor: [0, -30], // Position popup above the icon
 	});
 	useEffect(() => {
+		setLegendVisibility(() => false);
 		if (editableFG.current) {
 			editableFG.current.clearLayers();
 		}
@@ -54,10 +63,15 @@ function Hazard_Display({ hazardToggle }) {
 			return;
 		}
 		setHazards(() => []);
-		getHazards(hazardToggle).then((datas) => {
+		const hazards = getHazards(hazardToggle);
+		hazards.then((datas) => {
+			if (datas == false) {
+				DIALOG_ERROR("Error", "Backend ERROR", 1500);
+				setHazardToggle(() => 0);
+				return;
+			}
 			const hazardvar = Object.keys(datas).map((key) => {
 				const data = datas[key];
-
 				const position = [];
 				data.Outlines.forEach((coords) => {
 					position.push([
@@ -68,20 +82,102 @@ function Hazard_Display({ hazardToggle }) {
 				return (
 					<Polygon
 						key={data.HazardID}
+						eventHandlers={{
+							dblclick: (event) => {
+								setLegendVisibility(
+									() => true
+								);
+								console.log(
+									isLegendVisible
+								);
+								const {
+									target: {
+										_leaflet_id,
+									},
+								} = event;
+								setClickedID(
+									() =>
+										_leaflet_id
+								);
+							},
+						}}
 						pathOptions={{
 							color:
 								data.HazardTypeID ==
 								"LS200"
-									? "green"
-									: "red",
+									? landslideColors[
+											Number(
+												data.HazardServe
+											) -
+												1
+										]
+									: floodColors[
+											Number(
+												data.HazardServe
+											) -
+												1
+										],
 							weight: 5,
+							opacity: 1,
+							fillOpacity: 1,
 						}}
-						positions={position}
-					/>
+						positions={position}>
+						<Popup>
+							<div className="flex flex-col justify-center items-center gap-2">
+								<p className="m-0 font-bold text-lg">
+									Name:
+									<span className="font-normal mx-2">
+										{
+											data.HazardName
+										}
+									</span>
+								</p>
+								<p className="m-0 font-bold  text-lg">
+									Details:
+									<span className="font-normal mx-2">
+										{
+											data.HazardDetails
+										}
+									</span>
+								</p>
+								<Button
+									className="bg-blue-600 text-xl self-stretch text-white"
+									onClick={() => {
+										console.log(
+											hazardDetails
+										);
+										setHazardDetails(
+											() => {
+												return {
+													name: data.HazardName,
+													type: data.HazardTypeID,
+													susceptibility:
+														Number(
+															data.HazardServe
+														),
+													details: data.HazardDetails,
+												};
+											}
+										);
+
+										console.log(
+											data.HazardName
+										);
+										setDialogOpen(
+											() =>
+												true
+										);
+									}}>
+									Edit
+								</Button>
+							</div>
+						</Popup>
+					</Polygon>
 				);
 			});
 			setHazards(() => hazardvar);
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [hazardToggle]);
 	useEffect(() => {
 		if (mapRef.current) {
@@ -102,12 +198,18 @@ function Hazard_Display({ hazardToggle }) {
 	const POST_DATA = async (passData, passLayer) => {
 		//Correct
 		if (await writeData(passData)) {
-			console.log("write Data");
+			if (editableFG.current && hazardToggle == 0) {
+				editableFG.current.clearLayers();
+			}
 			DIALOG_SUCCESS("Sucess", "Writing Data Sucessful");
 			if (passLayer instanceof L.Polygon) {
 				setPolylines([...polylines, passLayer.getLatLngs()]);
 			} else if (passLayer instanceof L.Marker) {
 				setPolylines([...polylines, passLayer.getLatLng()]);
+			}
+			if (editableFG.current) {
+				editableFG.current.clearLayers();
+				setHazardToggle(() => 0);
 			}
 			return;
 		} else {
@@ -115,6 +217,7 @@ function Hazard_Display({ hazardToggle }) {
 			DIALOG_ERROR("Failed", "Writing Data Failed");
 			if (mapRef.current.hasLayer(passLayer))
 				mapRef.current.removeLayer(passLayer);
+			setHazardToggle(() => 0);
 		}
 	};
 	useEffect(() => {
@@ -127,7 +230,6 @@ function Hazard_Display({ hazardToggle }) {
 		const layer = newLayer;
 
 		const { name, type, details, susceptibility } = hazardDetails;
-		console.log(layer.options.color);
 		layer.setStyle({
 			color: type === "LS200" ? "#008000" : "#FF0000", // Make sure the color format is correct with a `#`
 		});
@@ -148,7 +250,6 @@ function Hazard_Display({ hazardToggle }) {
 				target: { _leaflet_id },
 			} = clickedLayer;
 			setLabel(_leaflet_id);
-			setClickedID(_leaflet_id);
 		});
 
 		// Update state with new polyline
@@ -178,19 +279,11 @@ function Hazard_Display({ hazardToggle }) {
 		const { layers } = e;
 
 		layers.eachLayer((layer) => {
-			if (layer._leaflet_id != outlineRef.current._leaflet_id) {
-				// Remove deleted polyline from state
-				setPolylines(
-					polylines.filter(
-						(polyline) =>
-							polyline !==
-							layer.getLatLngs()
-					)
-				);
-			}
-			// Optionally, add the polygon back or cancel deletion logic
-			editableFG.current.leafletElement.addLayer(layer);
-			return;
+			setPolylines(
+				polylines.filter(
+					(polyline) => polyline !== layer.getLatLngs()
+				)
+			);
 		});
 	};
 
@@ -199,7 +292,7 @@ function Hazard_Display({ hazardToggle }) {
 	};
 	useState(() => {
 		const Maps = async () => {
-			const response = await axios.get("/src/Data/Map.json");
+			const response = await axios.get("/Data/Map.json");
 			return response.data;
 		};
 
@@ -221,6 +314,7 @@ function Hazard_Display({ hazardToggle }) {
 				isDialogOpen={isDialogOpen}
 				setDialogOpen={setDialogOpen}
 				setHazardDetails={setHazardDetails}
+				hazardDetails={hazardDetails}
 			/>
 			<Legend
 				isLegendVisible={isLegendVisible}
@@ -264,8 +358,8 @@ function Hazard_Display({ hazardToggle }) {
 											polyline: false,
 											polygon: {
 												shapeOptions: {
-													color: markerColor,
-													opacity: 0.5,
+													color: "yellow",
+													opacity: 1,
 													fillOpacity: 0.5,
 												},
 											},
@@ -287,7 +381,7 @@ function Hazard_Display({ hazardToggle }) {
 										outlineRef
 									}
 									pathOptions={{
-										color: "red",
+										color: "blue",
 										weight: 5,
 									}}
 									interactive={
@@ -329,52 +423,76 @@ function Hazard_Display({ hazardToggle }) {
 						</Overlay> */}
 					</LayersControl>
 				</MapContainer>
-				<div className="flex flex-col items-center gap-2 absolute bottom-5 left-5 z-50">
-					{!isUser && (
-						<input
-							className=""
+				{isLegendVisible && (
+					<div className="flex flex-col w-32 lg:w-52 items-center justify-stretch gap-2 absolute bottom-5 left-5 z-50">
+						<Slider
+							valueLabelDisplay="auto"
+							min={0}
+							step={1}
+							max={100}
+							defaultValue={100}
 							onChange={(event) => {
-								const newColor =
+								const newOpacity =
 									event
 										.target
 										.value;
-								setMarker(newColor);
-							}}
-							type="color"
-							name="color"
-							id="color"
-							value={markerColor}
-						/>
-					)}
-					<input
-						className={`${isLegendVisible ? "opacity-100 visible " : "opacity-0 invisible"}  `}
-						onChange={(event) => {
-							const newOpacity =
-								event.target.value;
-							const map = mapRef.current;
+								const map =
+									mapRef.current;
 
-							const targetLayer =
-								map &&
-								map._layers[
-									clickedID
-								];
-							targetLayer.setStyle({
-								fillOpacity:
-									newOpacity /
-									100,
-							});
-						}}
-						type="range"
-						name="opacity"
-						id="opacityPicker"
-						min={0}
-						step={1}
-						max={100}
-					/>
-				</div>
+								const targetLayer =
+									map &&
+									map
+										._layers[
+										clickedID
+									];
+								targetLayer.setStyle(
+									{
+										fillOpacity:
+											newOpacity /
+											100,
+									}
+								);
+							}}
+						/>
+						{/* <input
+							onChange={(event) => {
+								const newOpacity =
+									event
+										.target
+										.value;
+								const map =
+									mapRef.current;
+
+								const targetLayer =
+									map &&
+									map
+										._layers[
+										clickedID
+									];
+								targetLayer.setStyle(
+									{
+										fillOpacity:
+											newOpacity /
+											100,
+									}
+								);
+							}}
+							type="range"
+							name="opacity"
+							id="opacityPicker"
+							min={0}
+							step={1}
+							max={100}
+						/> */}
+					</div>
+				)}
 			</div>
 		</>
 	);
 }
+Hazard_Display.propTypes = {
+	hazardToggle: Proptypes.number,
+	setHazardToggle: Proptypes.func,
+};
 
 export default Hazard_Display;

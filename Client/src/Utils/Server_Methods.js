@@ -27,9 +27,10 @@ export const getHazards = async (hazardType) => {
 		const response = await axios.get(
 			`http://localhost:5000/api/hazard/GET/${filter}`
 		);
+
 		return response.data;
 	} catch (error) {
 		console.log("Fetching Error", error);
+		return false;
 	}
-	return null;
 };
